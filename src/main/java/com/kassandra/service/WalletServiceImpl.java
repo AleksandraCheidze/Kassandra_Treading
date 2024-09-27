@@ -1,9 +1,11 @@
 package com.kassandra.service;
 
+import com.kassandra.domain.OrderType;
 import com.kassandra.modal.Order;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Wallet;
 import com.kassandra.repository.WalletRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,12 +46,15 @@ public class WalletServiceImpl implements WalletService{
         throw new Exception("wallet not found");
     }
 
+    @Transactional
     @Override
     public Wallet walletToWalletTransfer(User sender, Wallet receiverWallet, Long amount) throws Exception {
         Wallet senderWallet = getUserWallet(sender);
 
-        if (senderWallet.getBalance().compareTo(BigDecimal.valueOf(amount))<) {
-            throw new Exception("Insufficient balance...");
+        if (senderWallet.getBalance().compareTo(BigDecimal.valueOf(amount))<0) {
+            throw new Exception("Insufficient balance: requested transfer of "
+                    + amount + ", but current balance is "
+                    + senderWallet.getBalance());
         }
         BigDecimal senderBalance = senderWallet.getBalance().subtract(BigDecimal
                 .valueOf(amount));
@@ -61,11 +66,23 @@ public class WalletServiceImpl implements WalletService{
         return senderWallet;
     }
 
+    @Transactional
     @Override
-    public Wallet payOrderPayment(Order order, User user) {
+    public Wallet payOrderPayment(Order order, User user) throws Exception {
         Wallet wallet = getUserWallet(user);
 
-        if (order.getOrderType() == OrderType.)
-        return null;
+        if (order.getOrderType().equals(OrderType.BUY)){
+            BigDecimal newBalance = wallet.getBalance().subtract(order.getPrice());
+            if(newBalance.compareTo(order.getPrice())<0){
+                throw new Exception("Insufficient funds for this transaction");
+            }
+            wallet.setBalance(newBalance);
+        }
+        else {
+            BigDecimal newBalance = wallet.getBalance().add(order.getPrice());
+            wallet.setBalance(newBalance);
+        }
+        walletRepository.save(wallet);
+        return wallet;
     }
 }

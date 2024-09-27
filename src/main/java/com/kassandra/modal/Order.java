@@ -30,6 +30,6 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
-
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private OrderItem orderItem;
 }
