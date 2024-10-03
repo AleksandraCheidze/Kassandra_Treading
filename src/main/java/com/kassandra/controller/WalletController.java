@@ -4,6 +4,7 @@ import com.kassandra.modal.Order;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Wallet;
 import com.kassandra.modal.WalletTransaction;
+import com.kassandra.service.OrderService;
 import com.kassandra.service.UserService;
 import com.kassandra.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class WalletController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/api/wallet")
     public ResponseEntity<Wallet> getUserWallet(@RequestHeader("Authorization") String jwt) throws Exception {
