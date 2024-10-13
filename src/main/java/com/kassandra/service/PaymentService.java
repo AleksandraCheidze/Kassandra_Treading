@@ -5,6 +5,7 @@ import com.kassandra.modal.PaymentOrder;
 import com.kassandra.modal.User;
 import com.kassandra.response.PaymentResponse;
 import com.razorpay.RazorpayException;
+import com.stripe.exception.StripeException;
 
 public interface PaymentService {
 
@@ -14,5 +15,5 @@ public interface PaymentService {
     Boolean proceedPaymentOrder(PaymentOrder paymentOrder, String paymentId) throws RazorpayException;
 
     PaymentResponse createRazorpayPaymentLink(User user, Long amount) throws RazorpayException;
-    PaymentResponse createStripePaymentLing(User user, Long orderID);
+    PaymentResponse createStripePaymentLink(User user, Long amount, Long orderID) throws StripeException;
 }

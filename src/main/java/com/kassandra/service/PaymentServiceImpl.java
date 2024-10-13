@@ -1,5 +1,5 @@
 package com.kassandra.service;
-
+import com.stripe.model.checkout.Session;
 import com.kassandra.domain.PaymentMethod;
 import com.kassandra.domain.PaymentOrderStatus;
 import com.kassandra.modal.PaymentOrder;
@@ -10,10 +10,16 @@ import com.razorpay.Payment;
 import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.param.checkout.SessionCreateParams;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
 
 @Service
 public class PaymentServiceImpl implements PaymentService{
@@ -73,13 +79,13 @@ public class PaymentServiceImpl implements PaymentService{
     @Override
     public PaymentResponse createRazorpayPaymentLink(User user, Long amount) throws RazorpayException {
 
-        Long Amount = amount*100;
+        Long Amount = amount;
         try{
             RazorpayClient razorpay = new RazorpayClient(apiKey, apiSecretKey);
 
             JSONObject paymentLinkRequest = new JSONObject();
-            paymentLinkRequest.put("amount", amount);
-            paymentLinkRequest.put("currency", "INR");
+            paymentLinkRequest.put("amount", Amount);
+            paymentLinkRequest.put("currency", "EUR");
 
             JSONObject customer = new JSONObject();
             customer.put("name", user.getFullName());
@@ -114,7 +120,35 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
-    public PaymentResponse createStripePaymentLing(User user, Long orderID) {
-        return null;
+    public PaymentResponse createStripePaymentLink(User user, Long amount, Long orderID) throws StripeException {
+        Stripe.apiKey = stripeSecretKey;
+
+        SessionCreateParams params = SessionCreateParams.builder()
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                .setMode(SessionCreateParams.Mode.PAYMENT)
+                .setSuccessUrl("http://localhost.5173/wallet?ordr_id=" + orderID)
+                .setCancelUrl("http://localhost.5173/payment/cancel")
+                .addLineItem(SessionCreateParams.LineItem.builder()
+                        .setQuantity(1L)
+                        .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
+                                .setCurrency("eur")
+                                .setUnitAmount(amount)
+                                .setProductData(SessionCreateParams
+                                        .LineItem
+                                        .PriceData
+                                        .ProductData
+                                        .builder()
+                                        .setName("Top up wallet")
+                                        .build()
+                                ).build()
+                        ).build()
+                ).build();
+
+        Session session = Session.create(params);
+        System.out.println("session _____ " + session);
+
+        PaymentResponse res = new PaymentResponse();
+        res.setPayment_url(session.getUrl());
+        return res;
     }
 }
