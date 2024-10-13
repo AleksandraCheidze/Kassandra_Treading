@@ -6,6 +6,9 @@ import com.kassandra.modal.PaymentOrder;
 import com.kassandra.modal.User;
 import com.kassandra.repository.PaymentOrderRepository;
 import com.kassandra.response.PaymentResponse;
+import com.razorpay.Payment;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,9 +45,25 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
-    public Boolean proceedPaymentOrder(PaymentOrder paymentOrder, String paymentId) {
+    public Boolean proceedPaymentOrder(PaymentOrder paymentOrder, String paymentId) throws RazorpayException {
         if (paymentOrder.getStatus().equals(PaymentOrderStatus.PENDING)) {
-            if(paymentOrder.getPaymentMethod().equals(PaymentMethod.RAZORPAY))
+            if(paymentOrder.getPaymentMethod().equals(PaymentMethod.RAZORPAY)){
+                RazorpayClient razorpay = new RazorpayClient(apiKey, apiSecretKey);
+                Payment payment = razorpay.payments.fetch(paymentId);
+                Integer amount = payment.get("amount");
+                String status = payment.get("status");
+
+                if (status.equals("captured")){
+                    paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
+                    return true;
+                }
+                paymentOrder.setStatus(PaymentOrderStatus.FAILED);
+                paymentOrderRepository.save(paymentOrder);
+                return false;
+
+
+
+            }
         }
         return null;
     }
