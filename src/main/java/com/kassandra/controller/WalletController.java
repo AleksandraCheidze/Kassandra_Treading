@@ -1,10 +1,9 @@
 package com.kassandra.controller;
 
-import com.kassandra.modal.Order;
-import com.kassandra.modal.User;
-import com.kassandra.modal.Wallet;
-import com.kassandra.modal.WalletTransaction;
+import com.kassandra.modal.*;
+import com.kassandra.response.PaymentResponse;
 import com.kassandra.service.OrderService;
+import com.kassandra.service.PaymentService;
 import com.kassandra.service.UserService;
 import com.kassandra.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,9 @@ public class WalletController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private PaymentService paymentService;
+
     @GetMapping("/api/wallet")
     public ResponseEntity<Wallet> getUserWallet(@RequestHeader("Authorization") String jwt) throws Exception {
         User user = userService.findUserProfileByJwt(jwt);
@@ -33,6 +35,7 @@ public class WalletController {
 
         return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
+
     @PutMapping("/api/wallet/{walletId}/transfer")
     public ResponseEntity<Wallet> walletToWalletTransfer(
             @RequestHeader("Authorization") String jwt,
@@ -46,6 +49,7 @@ public class WalletController {
 
         return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
+
     @PutMapping("/api/wallet/order/{orderId}/pay")
     public ResponseEntity<Wallet> payOrderPayment(
             @RequestHeader("Authorization") String jwt,
@@ -54,6 +58,27 @@ public class WalletController {
         User user = userService.findUserProfileByJwt(jwt);
         Order order = orderService.getOrderById(orderId);
         Wallet wallet = walletService.payOrderPayment(order, user);
+        return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/api/wallet/order/deposit")
+    public ResponseEntity<Wallet> addBalanceToWallet(
+            @RequestHeader("Authorization") String jwt,
+            @RequestParam(name = "order_id") Long orderId,
+            @RequestParam(name = "payment_id") String paymentId
+
+    ) throws Exception {
+        User user = userService.findUserProfileByJwt(jwt);
+
+        Wallet wallet = walletService.getUserWallet(user);
+
+        PaymentOrder order = paymentService.getPaymentOrderById(orderId);
+
+        Boolean status = paymentService.proceedPaymentOrder(order, paymentId);
+
+        if (status){
+            wallet = walletService.addBalance(wallet, order.getAmount());
+        }
         return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
 }
