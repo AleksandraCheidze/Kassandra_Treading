@@ -56,7 +56,7 @@ public class CoinController {
         JsonNode jsonNode = objectMapper.readTree(coin);
         return ResponseEntity.ok(jsonNode);
     }
-    @GetMapping("/details/{coinId")
+    @GetMapping("/details/{coinId}")
     ResponseEntity<JsonNode> getCoinDetails(@PathVariable String coinId) throws Exception {
         String coin = coinService.getCoinDetails(coinId);
         JsonNode jsonNode = objectMapper.readTree(coin);

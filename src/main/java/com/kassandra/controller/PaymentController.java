@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
 public class PaymentController {
     @Autowired
     private UserService userService;
@@ -39,12 +38,8 @@ public class PaymentController {
              paymentResponse = paymentService.createRazorpayPaymentLink(user, amount);
          }
          else {
-             paymentResponse = paymentService.createStripePaymentLink(user, amount, orderId);
+             paymentResponse = paymentService.createStripePaymentLink(user, amount, order.getId());
          }
          return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
     }
-
-
-
-
 }

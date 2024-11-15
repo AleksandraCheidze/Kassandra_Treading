@@ -1,5 +1,6 @@
 package com.kassandra.controller;
 
+import com.kassandra.exception.UserException;
 import com.kassandra.modal.PaymentDetails;
 import com.kassandra.modal.User;
 import com.kassandra.service.PaymentDetailsService;
@@ -21,31 +22,30 @@ public class PaymentDetailsController {
     private PaymentDetailsService paymentDetailsService;
 
     @PostMapping("/payment-details")
-    public ResponseEntity<PaymentDetails> addPaymentDetails (
+    public ResponseEntity<PaymentDetails> addPaymentDetails(
             @RequestBody PaymentDetails paymentDetailsRequest,
             @RequestHeader("Authorization") String jwt) throws Exception {
 
         User user = userService.findUserProfileByJwt(jwt);
 
-        PaymentDetails paymentDetails = paymentDetailsService.addPaymentDetails(
+        PaymentDetails paymentDetails=paymentDetailsService.addPaymentDetails(
                 paymentDetailsRequest.getAccountNumber(),
-                paymentDetailsRequest.getBankName(),
-                paymentDetailsRequest.getIfsc(),
                 paymentDetailsRequest.getAccountHolderName(),
+                paymentDetailsRequest.getIfsc(),
+                paymentDetailsRequest.getBankName(),
                 user
         );
         return new ResponseEntity<>(paymentDetails, HttpStatus.CREATED);
     }
 
     @GetMapping("/payment-details")
-    public ResponseEntity<PaymentDetails> getUsersPaymentDetails (
+    public ResponseEntity<PaymentDetails> getUsersPaymentDetails(
 
             @RequestHeader("Authorization") String jwt) throws Exception {
 
         User user = userService.findUserProfileByJwt(jwt);
 
-        PaymentDetails paymentDetails = paymentDetailsService.getUsersPaymentDetails(user);
-        return new ResponseEntity<>(paymentDetails, HttpStatus.CREATED) ;
+        PaymentDetails paymentDetails=paymentDetailsService.getUsersPaymentDetails(user);
+        return new ResponseEntity<>(paymentDetails, HttpStatus.CREATED);
     }
-
 }
