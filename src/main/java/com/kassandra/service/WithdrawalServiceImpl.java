@@ -18,7 +18,7 @@ public class WithdrawalServiceImpl implements WithdrawalService{
     @Autowired
     private WithdrawalRepository withdrawalRepository;
     @Override
-    public Withdrawal requestyWithdrawal(Long amount, User user) {
+    public Withdrawal requestWithdrawal(Long amount, User user) {
         Withdrawal withdrawal = new Withdrawal();
         withdrawal.setAmount(amount);
         withdrawal.setUser(user);
@@ -27,7 +27,7 @@ public class WithdrawalServiceImpl implements WithdrawalService{
     }
 
     @Override
-    public Withdrawal procedWithwithdrawal(Long withdrawalId, boolean accept) throws Exception {
+    public Withdrawal procedWithdrawal(Long withdrawalId, boolean accept) throws Exception {
         Optional<Withdrawal> withdrawal = withdrawalRepository.findById(withdrawalId);
         if (withdrawal.isEmpty()){
             throw new Exception("withdrawal not found");

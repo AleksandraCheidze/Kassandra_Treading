@@ -23,44 +23,54 @@ public class CoinController {
     private ObjectMapper objectMapper;
 
     @GetMapping
-    ResponseEntity<List<Coin>>getCoinList(@RequestParam("page")int page) throws Exception {
-        List<Coin>coins = coinService.getCoinList(page);
-        return new ResponseEntity<>(coins, HttpStatus.ACCEPTED);
+    ResponseEntity<List<Coin>> getCoinList(@RequestParam("page") int page) throws Exception {
+        List<Coin> coins=coinService.getCoinList(page);
+        return new ResponseEntity<>(coins, HttpStatus.OK);
     }
+
     @GetMapping("/{coinId}/chart")
-    ResponseEntity<JsonNode>getMarketChart(
-            @PathVariable String coinId,
-            @RequestParam("days") int days
-    ) throws Exception {
-        String res = coinService.getMarketChart(coinId, days);
-        JsonNode jsonNode = objectMapper.readTree(res);
-        return new ResponseEntity<>(jsonNode, HttpStatus.ACCEPTED);
+    ResponseEntity<JsonNode> getMarketChart(@PathVariable String coinId,
+                                            @RequestParam("days")int days) throws Exception {
+        String coins=coinService.getMarketChart(coinId,days);
+        JsonNode jsonNode = objectMapper.readTree(coins);
+
+
+        return ResponseEntity.ok(jsonNode);
+
     }
+
+
     @GetMapping("/search")
-    ResponseEntity<JsonNode> searchCoin(@RequestParam("q")String keyword) throws Exception {
-        String coin = coinService.searchCoin(keyword);
+    ResponseEntity<JsonNode> searchCoin(@RequestParam("q") String keyword) throws Exception {
+        String coin=coinService.searchCoin(keyword);
         JsonNode jsonNode = objectMapper.readTree(coin);
 
-        return  ResponseEntity.ok(jsonNode);
+        return ResponseEntity.ok(jsonNode);
+
     }
     @GetMapping("/top50")
     ResponseEntity<JsonNode> getTop50CoinByMarketCapRank() throws Exception {
-    String coin = coinService.getTop50CoinsByMarketCapRank();
-    JsonNode jsonNode = objectMapper.readTree(coin);
-    return ResponseEntity.ok(jsonNode);
+        String coin=coinService.getTop50CoinsByMarketCapRank();
+        JsonNode jsonNode = objectMapper.readTree(coin);
+
+        return ResponseEntity.ok(jsonNode);
+
     }
 
     @GetMapping("/treading")
-    ResponseEntity<JsonNode> getTreadingCoins() throws Exception {
-        String coin = coinService.getTreadingCoins();
+    ResponseEntity<JsonNode> getTreadingCoin() throws Exception {
+        String coin=coinService.getTreadingCoins();
         JsonNode jsonNode = objectMapper.readTree(coin);
         return ResponseEntity.ok(jsonNode);
+
     }
+
     @GetMapping("/details/{coinId}")
     ResponseEntity<JsonNode> getCoinDetails(@PathVariable String coinId) throws Exception {
-        String coin = coinService.getCoinDetails(coinId);
+        String coin=coinService.getCoinDetails(coinId);
         JsonNode jsonNode = objectMapper.readTree(coin);
 
         return ResponseEntity.ok(jsonNode);
+
     }
 }

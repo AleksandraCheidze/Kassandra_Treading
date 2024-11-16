@@ -1,6 +1,7 @@
 package com.kassandra.service;
 
 import com.kassandra.domain.OrderType;
+import com.kassandra.exception.WalletException;
 import com.kassandra.modal.Order;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Wallet;
@@ -29,12 +30,21 @@ public class WalletServiceImpl implements WalletService{
     }
 
     @Override
-    public Wallet addBalance(Wallet wallet, Long money) {
-        BigDecimal balance = wallet.getBalance();
-        BigDecimal newBalance = balance.add(BigDecimal.valueOf(money));
+    public Wallet addBalanceToWallet(Wallet wallet, Long money) throws WalletException {
 
-        wallet.setBalance(newBalance);
-        return walletRepository.save(wallet);
+
+        BigDecimal newBalance = wallet.getBalance().add(BigDecimal.valueOf(money));
+
+//        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+//            throw new Exception("Insufficient funds for this transaction.");
+//        }
+
+
+        wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(money)));
+
+        walletRepository.save(wallet);
+        System.out.println("updated wallet - "+wallet);
+        return wallet;
     }
 
     @Override

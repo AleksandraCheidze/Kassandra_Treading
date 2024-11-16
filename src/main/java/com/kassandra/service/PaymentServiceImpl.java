@@ -33,6 +33,9 @@ public class PaymentServiceImpl implements PaymentService{
     @Value("${razorpay.api.secret}")
     private String apiSecretKey;
 
+    @Value("${razorpay.api.secret}")
+    private String apiSecret;
+
     @Override
     public PaymentOrder createOrder(User user, Long amount, PaymentMethod paymentMethod) {
         PaymentOrder paymentOrder = new PaymentOrder();
@@ -50,16 +53,18 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
-    public Boolean proceedPaymentOrder(PaymentOrder paymentOrder, String paymentId) throws RazorpayException {
-        if (paymentOrder.getStatus().equals(PaymentOrderStatus.PENDING)) {
+    public Boolean ProccedPaymentOrder(PaymentOrder paymentOrder, String paymentId) throws RazorpayException {
+        if(paymentOrder.getStatus().equals(PaymentOrderStatus.PENDING)){
+
             if(paymentOrder.getPaymentMethod().equals(PaymentMethod.RAZORPAY)){
-                RazorpayClient razorpay = new RazorpayClient(apiKey, apiSecretKey);
+                RazorpayClient razorpay = new RazorpayClient(apiKey, apiSecret);
                 Payment payment = razorpay.payments.fetch(paymentId);
+
                 Integer amount = payment.get("amount");
                 String status = payment.get("status");
-
-                if (status.equals("captured")){
+                if(status.equals("captured")){
                     paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
+
                     return true;
                 }
                 paymentOrder.setStatus(PaymentOrderStatus.FAILED);
@@ -68,8 +73,10 @@ public class PaymentServiceImpl implements PaymentService{
             }
             paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
             paymentOrderRepository.save(paymentOrder);
+            paymentOrderRepository.save(paymentOrder);
             return true;
         }
+
         return false;
     }
 

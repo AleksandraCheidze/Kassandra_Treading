@@ -8,6 +8,7 @@ import com.kassandra.response.AuthResponse;
 import com.kassandra.service.CustomUserDetailsService;
 import com.kassandra.service.EmailService;
 import com.kassandra.service.TwoFactorOtpService;
+import com.kassandra.service.WatchlistService;
 import com.kassandra.utils.OtpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,9 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private WatchlistService watchlistService;
+
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> register(@RequestBody User user) throws Exception {
         // Check if email is already in use
@@ -50,6 +54,8 @@ public class AuthController {
         newUser.setFullName(user.getFullName());
 
         User savedUser = userRepository.save(newUser);
+
+        watchlistService.createWatchList(savedUser);
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 user.getEmail(),
                 user.getPassword()
