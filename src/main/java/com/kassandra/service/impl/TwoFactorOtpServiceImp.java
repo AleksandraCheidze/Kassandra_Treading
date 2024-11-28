@@ -1,8 +1,9 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.modal.TwoFactorOTP;
 import com.kassandra.modal.User;
 import com.kassandra.repository.TwoFactorOtpRepository;
+import com.kassandra.service.TwoFactorOtpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class TwoFactorOtpServiceImp implements TwoFactorOtpService{
+public class TwoFactorOtpServiceImp implements TwoFactorOtpService {
 
     @Autowired
     private TwoFactorOtpRepository twoFactorOtpRepository;

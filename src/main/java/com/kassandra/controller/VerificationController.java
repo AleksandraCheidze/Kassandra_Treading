@@ -1,6 +1,6 @@
 package com.kassandra.controller;
 
-import com.kassandra.service.EmailService;
+import com.kassandra.service.impl.EmailService;
 import com.kassandra.service.UserService;
 import com.kassandra.service.VerificationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;

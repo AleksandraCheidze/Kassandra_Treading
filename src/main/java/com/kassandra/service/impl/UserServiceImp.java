@@ -1,10 +1,11 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.config.JwtProvider;
 import com.kassandra.domain.TwoFactorAuth;
 import com.kassandra.domain.VerificationType;
 import com.kassandra.modal.User;
 import com.kassandra.repository.UserRepository;
+import com.kassandra.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

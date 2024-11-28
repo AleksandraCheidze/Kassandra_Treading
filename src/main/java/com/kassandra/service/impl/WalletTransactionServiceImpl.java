@@ -1,9 +1,10 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.domain.WalletTransactionType;
 import com.kassandra.modal.Wallet;
 import com.kassandra.modal.WalletTransaction;
 import com.kassandra.repository.WalletTransactionRepository;
+import com.kassandra.service.WalletTransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class WalletTransactionServiceImpl implements WalletTransactionService{
+public class WalletTransactionServiceImpl implements WalletTransactionService {
     @Autowired
     private WalletTransactionRepository walletTransactionRepository;
 

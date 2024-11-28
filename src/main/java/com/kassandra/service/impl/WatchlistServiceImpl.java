@@ -1,16 +1,17 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.modal.Coin;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Watchlist;
 import com.kassandra.repository.WatchlistRepository;
+import com.kassandra.service.WatchlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class WatchlistServiceImpl implements WatchlistService{
+public class WatchlistServiceImpl implements WatchlistService {
     @Autowired
     private WatchlistRepository watchlistRepository;
 

@@ -1,15 +1,16 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.modal.Asset;
 import com.kassandra.modal.Coin;
 import com.kassandra.modal.User;
 import com.kassandra.repository.AssetRepository;
+import com.kassandra.service.AssetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Service
-public class AssetServiceImpl implements AssetService{
+public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private AssetRepository assetRepository;

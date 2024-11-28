@@ -9,6 +9,7 @@ import com.kassandra.request.ResetPasswordRequest;
 import com.kassandra.response.ApiResponse;
 import com.kassandra.response.AuthResponse;
 import com.kassandra.service.*;
+import com.kassandra.service.impl.EmailService;
 import com.kassandra.utils.OtpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

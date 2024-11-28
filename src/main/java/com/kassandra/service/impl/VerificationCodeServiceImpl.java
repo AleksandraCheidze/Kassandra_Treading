@@ -1,9 +1,10 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.domain.VerificationType;
 import com.kassandra.modal.User;
 import com.kassandra.modal.VerificationCode;
 import com.kassandra.repository.VerificationCodeRepository;
+import com.kassandra.service.VerificationCodeService;
 import com.kassandra.utils.OtpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class VerificationCodeServiceImpl implements VerificationCodeService{
+public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;

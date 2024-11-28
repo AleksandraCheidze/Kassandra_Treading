@@ -1,13 +1,14 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.modal.PaymentDetails;
 import com.kassandra.modal.User;
 import com.kassandra.repository.PaymentDetailsRepository;
+import com.kassandra.service.PaymentDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PaymentDetailsServiceImpl implements PaymentDetailsService{
+public class PaymentDetailsServiceImpl implements PaymentDetailsService {
 
     @Autowired
     private PaymentDetailsRepository paymentDetailsRepository;

@@ -1,9 +1,10 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.domain.WithdrawalStatus;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Withdrawal;
 import com.kassandra.repository.WithdrawalRepository;
+import com.kassandra.service.WithdrawalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,37 +13,43 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class WithdrawalServiceImpl implements WithdrawalService{
-
+public class WithdrawalServiceImpl implements WithdrawalService {
 
     @Autowired
     private WithdrawalRepository withdrawalRepository;
+
+
     @Override
-    public Withdrawal requestWithdrawal(Long amount, User user) {
-        Withdrawal withdrawal = new Withdrawal();
+    public Withdrawal requestWithdrawal(Long amount,User user) {
+        Withdrawal withdrawal=new Withdrawal();
         withdrawal.setAmount(amount);
-        withdrawal.setUser(user);
         withdrawal.setStatus(WithdrawalStatus.PENDING);
+        withdrawal.setDate(LocalDateTime.now());
+        withdrawal.setUser(user);
         return withdrawalRepository.save(withdrawal);
     }
 
     @Override
-    public Withdrawal procedWithdrawal(Long withdrawalId, boolean accept) throws Exception {
-        Optional<Withdrawal> withdrawal = withdrawalRepository.findById(withdrawalId);
-        if (withdrawal.isEmpty()){
-            throw new Exception("withdrawal not found");
+    public Withdrawal procedWithdrawal(Long withdrawalId,boolean accept) throws Exception {
+        Optional<Withdrawal> withdrawalOptional=withdrawalRepository.findById(withdrawalId);
+
+        if(withdrawalOptional.isEmpty()){
+            throw new Exception("withdrawal id is wrong...");
         }
-        Withdrawal withdrawal1 = withdrawal.get();
 
-        withdrawal1.setDate(LocalDateTime.now());
+        Withdrawal withdrawal=withdrawalOptional.get();
 
-        if (accept){
-            withdrawal1.setStatus(WithdrawalStatus.SUCCESS);
+
+        withdrawal.setDate(LocalDateTime.now());
+
+        if(accept){
+            withdrawal.setStatus(WithdrawalStatus.SUCCESS);
         }
         else{
-            withdrawal1.setStatus(WithdrawalStatus.PENDING);
+            withdrawal.setStatus(WithdrawalStatus.DECLINE);
         }
-        return withdrawalRepository.save(withdrawal1);
+
+        return withdrawalRepository.save(withdrawal);
     }
 
     @Override

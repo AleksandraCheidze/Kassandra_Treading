@@ -1,16 +1,17 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.domain.VerificationType;
 import com.kassandra.modal.ForgotPasswordToken;
 import com.kassandra.modal.User;
 import com.kassandra.repository.ForgotPasswordRepository;
+import com.kassandra.service.ForgotPasswordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class ForgotPasswordImpl implements ForgotPasswordService{
+public class ForgotPasswordImpl implements ForgotPasswordService {
 
     @Autowired
     private ForgotPasswordRepository forgotPasswordRepository;

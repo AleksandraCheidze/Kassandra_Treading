@@ -1,4 +1,4 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

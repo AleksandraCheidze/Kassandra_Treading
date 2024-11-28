@@ -1,4 +1,4 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.modal.User;
 import com.kassandra.repository.UserRepository;

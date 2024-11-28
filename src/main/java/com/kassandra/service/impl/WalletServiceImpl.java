@@ -1,4 +1,4 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.kassandra.domain.OrderType;
 import com.kassandra.exception.WalletException;
@@ -6,7 +6,11 @@ import com.kassandra.modal.Order;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Wallet;
 import com.kassandra.repository.WalletRepository;
+import com.kassandra.service.WalletService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +18,8 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
-public class WalletServiceImpl implements WalletService{
+public class WalletServiceImpl implements WalletService {
+    private static final Logger logger = LoggerFactory.getLogger(WalletServiceImpl.class);
 
     @Autowired
     private WalletRepository walletRepository;
@@ -30,7 +35,7 @@ public class WalletServiceImpl implements WalletService{
     }
 
     @Override
-    public Wallet addBalanceToWallet(Wallet wallet, Long money) throws WalletException {
+    public Wallet addBalanceToWallet(Wallet wallet, Long money) {
 
 
         BigDecimal newBalance = wallet.getBalance().add(BigDecimal.valueOf(money));
@@ -66,13 +71,10 @@ public class WalletServiceImpl implements WalletService{
                     + amount + ", but current balance is "
                     + senderWallet.getBalance());
         }
-        BigDecimal senderBalance = senderWallet.getBalance().subtract(BigDecimal
-                .valueOf(amount));
-        senderWallet.setBalance(senderBalance);
+        senderWallet.setBalance(senderWallet.getBalance().subtract(BigDecimal.valueOf(amount)));
         walletRepository.save(senderWallet);
 
-        BigDecimal receiverBalance = receiverWallet.getBalance().add(BigDecimal.valueOf(amount));
-        receiverWallet.setBalance(receiverBalance);
+        receiverWallet.setBalance(receiverWallet.getBalance().add(BigDecimal.valueOf(amount)));
         return senderWallet;
     }
 
@@ -81,16 +83,13 @@ public class WalletServiceImpl implements WalletService{
     public Wallet payOrderPayment(Order order, User user) throws Exception {
         Wallet wallet = getUserWallet(user);
 
-        if (order.getOrderType().equals(OrderType.BUY)){
-            BigDecimal newBalance = wallet.getBalance().subtract(order.getPrice());
-            if(newBalance.compareTo(order.getPrice())<0){
+        if (order.getOrderType().equals(OrderType.BUY)) {
+            if (wallet.getBalance().compareTo(order.getPrice()) < 0) {
                 throw new Exception("Insufficient funds for this transaction");
             }
-            wallet.setBalance(newBalance);
-        }
-        else {
-            BigDecimal newBalance = wallet.getBalance().add(order.getPrice());
-            wallet.setBalance(newBalance);
+            wallet.setBalance(wallet.getBalance().subtract(order.getPrice()));
+        } else {
+            wallet.setBalance(wallet.getBalance().add(order.getPrice()));
         }
         walletRepository.save(wallet);
         return wallet;

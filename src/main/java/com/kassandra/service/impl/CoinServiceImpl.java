@@ -1,10 +1,11 @@
-package com.kassandra.service;
+package com.kassandra.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kassandra.modal.Coin;
 import com.kassandra.response.CoinRepository;
+import com.kassandra.service.CoinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
