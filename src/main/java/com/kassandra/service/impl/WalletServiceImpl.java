@@ -17,7 +17,6 @@ import java.util.Optional;
 
 @Service
 public class WalletServiceImpl implements WalletService {
-    private static final Logger logger = LoggerFactory.getLogger(WalletServiceImpl.class);
 
     @Autowired
     private WalletRepository walletRepository;
@@ -34,15 +33,13 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Wallet addBalanceToWallet(Wallet wallet, Long money) {
-        // Рассчитываем новый баланс
-        BigDecimal newBalance = wallet.getBalance().add(BigDecimal.valueOf(money));  // Исправлено добавление
 
-        // Устанавливаем обновленный баланс
+        BigDecimal newBalance = wallet.getBalance().add(BigDecimal.valueOf(money));
+
         wallet.setBalance(newBalance);
 
-        // Сохраняем изменения в базе данных
         walletRepository.save(wallet);
-        System.out.println("Updated wallet - " + wallet);  // Лог для проверки
+        System.out.println("Updated wallet - " + wallet);
 
         return wallet;
     }

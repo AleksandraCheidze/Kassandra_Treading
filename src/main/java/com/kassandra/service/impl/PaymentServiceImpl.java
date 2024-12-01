@@ -27,7 +27,6 @@ import java.util.Optional;
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
-    private static final Logger log = LoggerFactory.getLogger(PaymentServiceImpl.class);
 
     @Autowired
     private PaymentOrderRepository paymentOrderRepository;
@@ -74,51 +73,44 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (paymentOrder.getStatus().equals(PaymentOrderStatus.PENDING)) {
             if (paymentOrder.getPaymentMethod().equals(PaymentMethod.PAYPAL)) {
-                APIContext apiContext = new APIContext(clientId, clientSecret, "sandbox");  // или "live" для продакшена
+                APIContext apiContext = new APIContext(clientId, clientSecret, "sandbox");
                 System.out.println("Attempting to retrieve payment with ID: " + paymentId);
 
-                Payment payment = Payment.get(apiContext, paymentId);  // Получаем платеж по ID
+                Payment payment = Payment.get(apiContext, paymentId);
                 System.out.println("Retrieved payment state: " + payment.getState());
 
                 String status = payment.getState();
 
-                if ("approved".equals(status)) {  // Если платеж был подтвержден
+                if ("approved".equals(status)) {
                     paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
-                    paymentOrderRepository.save(paymentOrder);  // Сохраняем успешный статус
+                    paymentOrderRepository.save(paymentOrder);
                     return true;
                 }
-
-                // Если платеж не был подтвержден, и статус "created", выполняем его
                 if ("created".equals(status)) {
                     System.out.println("Payment is in 'created' state. Trying to execute the payment.");
 
-                    // Создаем объект для выполнения платежа
                     PaymentExecution paymentExecution = new PaymentExecution();
-                    paymentExecution.setPayerId(payment.getPayer().getPayerInfo().getPayerId()); // Получаем PayerId из платежа
+                    paymentExecution.setPayerId(payment.getPayer().getPayerInfo().getPayerId());
                     Payment executedPayment = payment.execute(apiContext, paymentExecution);
 
-                    // Новый статус после выполнения
                     status = executedPayment.getState();
 
-                    // Проверяем, если платеж теперь успешен
                     if ("approved".equals(status)) {
                         paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
-                        paymentOrderRepository.save(paymentOrder);  // Сохраняем успешный статус
+                        paymentOrderRepository.save(paymentOrder);
                         System.out.println("Payment approved after execution, order status updated to SUCCESS");
                         return true;
                     }
                 }
 
-                // Если платеж не был подтвержден, устанавливаем статус FAILED
                 paymentOrder.setStatus(PaymentOrderStatus.FAILED);
                 paymentOrderRepository.save(paymentOrder);
                 System.out.println("Payment failed, order status updated to FAILED");
                 return false;
             }
 
-            // Для других способов оплаты
             paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
-            paymentOrderRepository.save(paymentOrder);  // Сохраняем успешный статус
+            paymentOrderRepository.save(paymentOrder);
             return true;
         }
 

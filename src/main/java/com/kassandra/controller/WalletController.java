@@ -58,7 +58,7 @@ public class WalletController {
                                                         @PathVariable Long amount) throws Exception {
         User user =userService.findUserProfileByJwt(jwt);
         Wallet wallet = walletService.getUserWallet(user);
-//        PaymentResponse res = walleteService.depositFunds(user,amount);
+
         PaymentResponse res = new PaymentResponse();
         res.setPayment_url("deposite success");
         walletService.addBalanceToWallet(wallet, amount);
@@ -95,13 +95,6 @@ public class WalletController {
 
     }
 
-//    @PutMapping("/api/wallet/withdraw/amount/{amount}/user/{userId}")
-//    public ResponseEntity<PaymentResponse> withdrawMoney(@PathVariable Long userId, @PathVariable Long amount) throws Exception {
-//
-//        String wallet = walleteService.depositFunds(userId,amount);
-//
-//        return new ResponseEntity<>(wallet,HttpStatus.OK);
-//    }
 
     @PutMapping("/api/wallet/{walletId}/transfer")
     public ResponseEntity<Wallet> walletToWalletTransfer(@RequestHeader("Authorization")String jwt,
