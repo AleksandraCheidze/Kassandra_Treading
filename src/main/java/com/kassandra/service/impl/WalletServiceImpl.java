@@ -1,13 +1,11 @@
 package com.kassandra.service.impl;
 
 import com.kassandra.domain.OrderType;
-import com.kassandra.exception.WalletException;
 import com.kassandra.modal.Order;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Wallet;
 import com.kassandra.repository.WalletRepository;
 import com.kassandra.service.WalletService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,21 +34,20 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Wallet addBalanceToWallet(Wallet wallet, Long money) {
+        // Рассчитываем новый баланс
+        BigDecimal newBalance = wallet.getBalance().add(BigDecimal.valueOf(money));  // Исправлено добавление
 
+        // Устанавливаем обновленный баланс
+        wallet.setBalance(newBalance);
 
-        BigDecimal newBalance = wallet.getBalance().add(BigDecimal.valueOf(money));
-
-//        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-//            throw new Exception("Insufficient funds for this transaction.");
-//        }
-
-
-        wallet.setBalance(wallet.getBalance().add(BigDecimal.valueOf(money)));
-
+        // Сохраняем изменения в базе данных
         walletRepository.save(wallet);
-        System.out.println("updated wallet - "+wallet);
+        System.out.println("Updated wallet - " + wallet);  // Лог для проверки
+
         return wallet;
     }
+
+
 
     @Override
     public Wallet findWalletById(Long id) throws Exception {

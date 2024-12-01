@@ -1,6 +1,5 @@
 package com.kassandra.service;
 
-import com.kassandra.exception.WalletException;
 import com.kassandra.modal.Order;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Wallet;

@@ -68,21 +68,51 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Boolean proccedPaymentOrder(PaymentOrder paymentOrder, String paymentId) throws PayPalRESTException {
-        if (paymentOrder.getStatus().equals(PaymentOrderStatus.PENDING)) {
+        if (paymentOrder.getStatus() == null) {
+            paymentOrder.setStatus(PaymentOrderStatus.PENDING);
+        }
 
+        if (paymentOrder.getStatus().equals(PaymentOrderStatus.PENDING)) {
             if (paymentOrder.getPaymentMethod().equals(PaymentMethod.PAYPAL)) {
                 APIContext apiContext = new APIContext(clientId, clientSecret, "sandbox");  // или "live" для продакшена
+                System.out.println("Attempting to retrieve payment with ID: " + paymentId);
+
                 Payment payment = Payment.get(apiContext, paymentId);  // Получаем платеж по ID
+                System.out.println("Retrieved payment state: " + payment.getState());
+
                 String status = payment.getState();
 
-                if (status.equals("approved")) {  // Проверка на успешное завершение платежа
+                if ("approved".equals(status)) {  // Если платеж был подтвержден
                     paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
                     paymentOrderRepository.save(paymentOrder);  // Сохраняем успешный статус
                     return true;
                 }
 
-                paymentOrder.setStatus(PaymentOrderStatus.FAILED);  // Если платеж не успешен, сохраняем статус FAILED
+                // Если платеж не был подтвержден, и статус "created", выполняем его
+                if ("created".equals(status)) {
+                    System.out.println("Payment is in 'created' state. Trying to execute the payment.");
+
+                    // Создаем объект для выполнения платежа
+                    PaymentExecution paymentExecution = new PaymentExecution();
+                    paymentExecution.setPayerId(payment.getPayer().getPayerInfo().getPayerId()); // Получаем PayerId из платежа
+                    Payment executedPayment = payment.execute(apiContext, paymentExecution);
+
+                    // Новый статус после выполнения
+                    status = executedPayment.getState();
+
+                    // Проверяем, если платеж теперь успешен
+                    if ("approved".equals(status)) {
+                        paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
+                        paymentOrderRepository.save(paymentOrder);  // Сохраняем успешный статус
+                        System.out.println("Payment approved after execution, order status updated to SUCCESS");
+                        return true;
+                    }
+                }
+
+                // Если платеж не был подтвержден, устанавливаем статус FAILED
+                paymentOrder.setStatus(PaymentOrderStatus.FAILED);
                 paymentOrderRepository.save(paymentOrder);
+                System.out.println("Payment failed, order status updated to FAILED");
                 return false;
             }
 
@@ -96,17 +126,18 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
 
+
     @Override
     public PaymentResponse createPaypalPaymentLink(User user, Long Amount, Long orderId) throws PayPalRESTException {
 
         APIContext apiContext = paypalConfig.apiContext();
 
-        Amount amount = new Amount();
-        amount.setCurrency("USD");
-        amount.setTotal(String.valueOf(Amount));
+        Amount totalAmount = new Amount();
+        totalAmount.setCurrency("USD");
+        totalAmount.setTotal(String.valueOf(Amount));
 
         Transaction transaction = new Transaction();
-        transaction.setAmount(amount);
+        transaction.setAmount(totalAmount);
         transaction.setDescription("Order #" + orderId);
 
         List<Transaction> transactions = new ArrayList<>();
@@ -115,11 +146,11 @@ public class PaymentServiceImpl implements PaymentService {
         // Настройка URL-ов возврата и отмены
         RedirectUrls redirectUrls = new RedirectUrls();
         redirectUrls.setCancelUrl("http://localhost:5173/wallet/cancel");
-        redirectUrls.setReturnUrl("http://localhost:5173/wallet?ordr_id="+ orderId);
+        redirectUrls.setReturnUrl("http://localhost:5173/wallet?order_id="+ orderId);
 
         Payment payment = new Payment();
         payment.setIntent("sale");
-        payment.setPayer(new com.paypal.api.payments.Payer().setPaymentMethod("paypal"));
+        payment.setPayer(new Payer().setPaymentMethod("paypal"));
         payment.setTransactions(transactions);
         payment.setRedirectUrls(redirectUrls);
 
@@ -128,7 +159,7 @@ public class PaymentServiceImpl implements PaymentService {
         String approvalLink = createdPayment.getLinks().stream()
                 .filter(link -> "approval_url".equals(link.getRel()))
                 .findFirst()
-                .map(com.paypal.api.payments.Links::getHref)
+                .map(Links::getHref)
                 .orElseThrow(() -> new RuntimeException("No approval URL found"));
 
         PaymentResponse res = new PaymentResponse();

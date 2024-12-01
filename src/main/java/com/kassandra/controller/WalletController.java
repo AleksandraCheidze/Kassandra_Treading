@@ -9,13 +9,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
 @RestController
 public class WalletController {
     @Autowired
-    private WalletService walleteService;
+    private WalletService walletService;
 
     @Autowired
     private UserService userService;
@@ -35,7 +36,7 @@ public class WalletController {
     public ResponseEntity<?> getUserWallet(@RequestHeader("Authorization")String jwt) throws Exception {
         User user=userService.findUserProfileByJwt(jwt);
 
-        Wallet wallet = walleteService.getUserWallet(user);
+        Wallet wallet = walletService.getUserWallet(user);
 
         return new ResponseEntity<>(wallet, HttpStatus.OK);
     }
@@ -45,7 +46,7 @@ public class WalletController {
             @RequestHeader("Authorization")String jwt) throws Exception {
         User user=userService.findUserProfileByJwt(jwt);
 
-        Wallet wallet = walleteService.getUserWallet(user);
+        Wallet wallet = walletService.getUserWallet(user);
 
         List<WalletTransaction> transactions=walletTransactionService.getTransactions(wallet,null);
 
@@ -56,33 +57,37 @@ public class WalletController {
     public ResponseEntity<PaymentResponse> depositMoney(@RequestHeader("Authorization")String jwt,
                                                         @PathVariable Long amount) throws Exception {
         User user =userService.findUserProfileByJwt(jwt);
-        Wallet wallet = walleteService.getUserWallet(user);
+        Wallet wallet = walletService.getUserWallet(user);
 //        PaymentResponse res = walleteService.depositFunds(user,amount);
-        PaymentResponse res = new PaymentResponse("Stripe error: " + e.getMessage());
+        PaymentResponse res = new PaymentResponse();
         res.setPayment_url("deposite success");
-        walleteService.addBalanceToWallet(wallet, amount);
+        walletService.addBalanceToWallet(wallet, amount);
 
         return new ResponseEntity<>(res,HttpStatus.OK);
 
     }
 
+
     @PutMapping("/api/wallet/deposit")
-    public ResponseEntity<Wallet> addMoneyToWallet(
+    public ResponseEntity<Wallet> addBalanceToWallet(
             @RequestHeader("Authorization")String jwt,
             @RequestParam(name="order_id") Long orderId,
             @RequestParam(name="payment_id")String paymentId
     ) throws Exception {
         User user =userService.findUserProfileByJwt(jwt);
-        Wallet wallet = walleteService.getUserWallet(user);
+        Wallet wallet = walletService.getUserWallet(user);
 
 
         PaymentOrder order = paymentService.getPaymentOrderById(orderId);
         Boolean status=paymentService.proccedPaymentOrder(order,paymentId);
-        PaymentResponse res = new PaymentResponse("Stripe error: " + e.getMessage());
+        PaymentResponse res = new PaymentResponse();
         res.setPayment_url("deposite success");
 
+        if(wallet.getBalance()==null){
+    wallet.setBalance(BigDecimal.valueOf(0));
+        }
         if(status){
-            wallet=walleteService.addBalanceToWallet(wallet, order.getAmount());
+            wallet=walletService.addBalanceToWallet(wallet, order.getAmount());
         }
 
 
@@ -106,9 +111,9 @@ public class WalletController {
         User senderUser =userService.findUserProfileByJwt(jwt);
 
 
-        Wallet reciverWallet = walleteService.findWalletById(walletId);
+        Wallet reciverWallet = walletService.findWalletById(walletId);
 
-        Wallet wallet = walleteService.walletToWalletTransfer(senderUser,reciverWallet, req.getAmount());
+        Wallet wallet = walletService.walletToWalletTransfer(senderUser,reciverWallet, req.getAmount());
         WalletTransaction walletTransaction=walletTransactionService.createTransaction(
                 wallet,
                 WalletTransactionType.WALLET_TRANSFER,reciverWallet.getId().toString(),
@@ -128,7 +133,7 @@ public class WalletController {
         System.out.println("-------- "+orderId);
         Order order=orderService.getOrderById(orderId);
 
-        Wallet wallet = walleteService.payOrderPayment(order,user);
+        Wallet wallet = walletService.payOrderPayment(order,user);
 
         return new ResponseEntity<>(wallet,HttpStatus.OK);
 
