@@ -1,6 +1,7 @@
 package com.kassandra.service.impl;
 
 import com.kassandra.domain.OrderType;
+import com.kassandra.exception.WalletException;
 import com.kassandra.modal.Order;
 import com.kassandra.modal.User;
 import com.kassandra.modal.Wallet;
@@ -26,7 +27,7 @@ public class WalletServiceImpl implements WalletService {
         if (wallet == null){
             wallet = new Wallet();
             wallet.setUser(user);
-
+            walletRepository.save(wallet);
         }
         return wallet;
     }
@@ -57,20 +58,44 @@ public class WalletServiceImpl implements WalletService {
 
     @Transactional
     @Override
-    public Wallet walletToWalletTransfer(User sender, Wallet receiverWallet, Long amount) throws Exception {
+    public Wallet walletToWalletTransfer(User sender, Wallet receiverWallet, Long amount) throws WalletException {
+        // Получаем кошелек отправителя
         Wallet senderWallet = getUserWallet(sender);
 
-        if (senderWallet.getBalance().compareTo(BigDecimal.valueOf(amount))<0) {
-            throw new Exception("Insufficient balance: requested transfer of "
-                    + amount + ", but current balance is "
-                    + senderWallet.getBalance());
+        // Добавим логирование для проверки баланса
+        System.out.println("Sender Wallet Balance: " + senderWallet.getBalance());
+        System.out.println("Transfer Amount: " + amount);
+
+        // Проверяем, что на кошельке отправителя достаточно средств
+        BigDecimal senderBalance = senderWallet.getBalance();
+        if (senderBalance == null) {
+            senderBalance = BigDecimal.ZERO;
         }
-        senderWallet.setBalance(senderWallet.getBalance().subtract(BigDecimal.valueOf(amount)));
+
+        if (senderBalance.compareTo(BigDecimal.valueOf(amount)) < 0) {
+            // Добавим логирование перед выбрасыванием исключения
+            System.out.println("Insufficient balance. Sender balance: " + senderBalance + ", Transfer amount: " + amount);
+            throw new WalletException("Insufficient balance...");
+        }
+
+        // Вычитаем сумму с баланса отправителя
+        senderBalance = senderBalance.subtract(BigDecimal.valueOf(amount));
+        senderWallet.setBalance(senderBalance);
         walletRepository.save(senderWallet);
 
-        receiverWallet.setBalance(receiverWallet.getBalance().add(BigDecimal.valueOf(amount)));
+        // Добавляем сумму на баланс получателя
+        BigDecimal receiverBalance = receiverWallet.getBalance();
+        if (receiverBalance == null) {
+            receiverBalance = BigDecimal.ZERO;
+        }
+
+        receiverBalance = receiverBalance.add(BigDecimal.valueOf(amount));
+        receiverWallet.setBalance(receiverBalance);
+        walletRepository.save(receiverWallet);
+
         return senderWallet;
     }
+
 
     @Transactional
     @Override

@@ -97,25 +97,30 @@ public class WalletController {
 
 
     @PutMapping("/api/wallet/{walletId}/transfer")
-    public ResponseEntity<Wallet> walletToWalletTransfer(@RequestHeader("Authorization")String jwt,
+    public ResponseEntity<Wallet> walletToWalletTransfer(@RequestHeader("Authorization") String jwt,
                                                          @PathVariable Long walletId,
-                                                         @RequestBody WalletTransaction req
-    ) throws Exception {
-        User senderUser =userService.findUserProfileByJwt(jwt);
+                                                         @RequestBody WalletTransaction req) throws Exception {
+        // Получаем пользователя по JWT
+        User senderUser = userService.findUserProfileByJwt(jwt);
 
+        // Получаем кошелек получателя
+        Wallet receiverWallet = walletService.findWalletById(walletId);
 
-        Wallet reciverWallet = walletService.findWalletById(walletId);
+        // Осуществляем перевод
+        Wallet wallet = walletService.walletToWalletTransfer(
+                senderUser, receiverWallet,
+                req.getAmount());
 
-        Wallet wallet = walletService.walletToWalletTransfer(senderUser,reciverWallet, req.getAmount());
-        WalletTransaction walletTransaction=walletTransactionService.createTransaction(
+        // Создаем транзакцию
+        walletTransactionService.createTransaction(
                 wallet,
-                WalletTransactionType.WALLET_TRANSFER,reciverWallet.getId().toString(),
+                WalletTransactionType.WALLET_TRANSFER,
+                String.valueOf(receiverWallet.getId()),  // Передаем ID получателя как Long
                 req.getPurpose(),
-                -req.getAmount()
+                req.getAmount()
         );
 
-        return new ResponseEntity<>(wallet,HttpStatus.OK);
-
+        return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
     }
 
 
