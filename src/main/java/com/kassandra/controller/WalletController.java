@@ -100,22 +100,18 @@ public class WalletController {
     public ResponseEntity<Wallet> walletToWalletTransfer(@RequestHeader("Authorization") String jwt,
                                                          @PathVariable Long walletId,
                                                          @RequestBody WalletTransaction req) throws Exception {
-        // Получаем пользователя по JWT
         User senderUser = userService.findUserProfileByJwt(jwt);
 
-        // Получаем кошелек получателя
         Wallet receiverWallet = walletService.findWalletById(walletId);
 
-        // Осуществляем перевод
         Wallet wallet = walletService.walletToWalletTransfer(
                 senderUser, receiverWallet,
                 req.getAmount());
 
-        // Создаем транзакцию
         walletTransactionService.createTransaction(
                 wallet,
                 WalletTransactionType.WALLET_TRANSFER,
-                String.valueOf(receiverWallet.getId()),  // Передаем ID получателя как Long
+                String.valueOf(receiverWallet.getId()),
                 req.getPurpose(),
                 req.getAmount()
         );

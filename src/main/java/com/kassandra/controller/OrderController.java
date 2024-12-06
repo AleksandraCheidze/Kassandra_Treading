@@ -40,7 +40,10 @@ public class OrderController {
         User user = userService.findUserProfileByJwt(jwt);
         Coin coin = coinService.findById(req.getCoinId());
 
-        Order order = orderService.processOrder(coin, req.getQuantity(), req.getOrderType(), user);
+        Order order = orderService.processOrder(coin,
+                req.getQuantity(),
+                req.getOrderType(),
+                user);
         return ResponseEntity.ok(order);
     }
 
