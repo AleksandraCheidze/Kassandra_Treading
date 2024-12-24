@@ -1,2 +1,2 @@
 # Cassandra_Trading
-Crypto Treading Platform
+Crypto Trading Platform
